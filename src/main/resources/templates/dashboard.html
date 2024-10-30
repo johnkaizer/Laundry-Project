@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Shine Dry Cleaners</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Font Awesome for icons -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for dynamic content loading -->
+</head>
+<body>
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Shine Dry Cleaners</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" data-page="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+            <li><a href="#" data-page="customers.html"><i class="fas fa-users"></i> Customers</a></li>
+            <li><a href="#" data-page="services.html"><i class="fas fa-concierge-bell"></i> Services</a></li>
+            <li><a href="#" data-page="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="#" data-page="reports.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header">
+            <h2>Welcome to the Dashboard</h2>
+        </div>
+        <div class="content" id="content-area">
+            <p>Select an option from the sidebar to get started.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to dynamically load HTML content into the content area
+    $(document).ready(function() {
+        $('.sidebar-menu a').on('click', function(e) {
+            e.preventDefault();
+            var page = $(this).data('page'); // Get the data-page value
+
+            // Load the Thymeleaf fragment by invoking the controller
+            $('#content-area').load('/fragments/' + page);
+        });
+    });
+</script>
+</body>
+</html>

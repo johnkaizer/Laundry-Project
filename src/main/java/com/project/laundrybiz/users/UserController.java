@@ -1,41 +1,125 @@
 package com.project.laundrybiz.users;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
+import java.util.prefs.Preferences;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
+    // GET all users
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        List<User> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    // GET user by ID
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+        User user = userService.getUserById(id);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
+    // POST: Create a new user
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User createdUser = userService.saveUser(user);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
+    // DELETE: Remove a user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // PUT: Update user details
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        User existingUser = userService.getUserById(id);
+        if (existingUser != null) {
+            existingUser.setFullName(user.getFullName());
+            existingUser.setUsername(user.getUsername());
+            existingUser.setPhone(user.getPhone());
+
+            // Update password only if provided
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                existingUser.setPassword(user.getPassword());
+            }
+
+            User updatedUser = userService.saveUser(existingUser);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // POST: Handle login
+    @PostMapping("/login")
+    public ModelAndView login(@RequestParam("username") String username,
+                              @RequestParam("password") String password,
+                              RedirectAttributes redirectAttributes) {
+        // Authenticate user
+        User user = userService.authenticateUser(username, password);
+        if (user != null) {
+            // Save the username and role in preferences
+            Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+            prefs.put("loggedInUsername", username);
+            prefs.put("loggedInUserRole", user.getRole());
+
+            // Redirect all users to the unified dashboard
+            return new ModelAndView(new RedirectView("/dashboard"));
+        } else {
+            // Invalid credentials; redirect to the login page with error
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid username or password");
+            return new ModelAndView(new RedirectView("/login"));
+        }
+    }
+
+    // GET: Get current logged-in username
+    @GetMapping("/currentUsername")
+    public ResponseEntity<String> getCurrentUsername() {
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        String loggedInUsername = prefs.get("loggedInUsername", null);
+        if (loggedInUsername != null) {
+            return new ResponseEntity<>(loggedInUsername, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    // GET: Get current logged-in user details
+    @GetMapping("/current")
+    public ResponseEntity<User> getCurrentUser() {
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        String loggedInUsername = prefs.get("loggedInUsername", null);
+        if (loggedInUsername != null) {
+            User user = userService.getUserByUsername(loggedInUsername);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

@@ -1,0 +1,110 @@
+<div>
+    <h3>Customers</h3>
+
+    <!-- Add New Customer Button -->
+    <button id="addCustomerBtn" class="btn btn-primary">Add New Customer</button>
+
+    <!-- Customer Table -->
+    <table id="customerTable" class="customer-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Customer Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Actions</th> <!-- Column for Edit/Delete -->
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Assuming data is dynamically filled here using Thymeleaf or a JavaScript-based approach -->
+        <tr>
+            <td>1</td>
+            <td>John Doe</td>
+            <td>john@example.com</td>
+            <td>+1234567890</td>
+            <td>123 Main St</td>
+            <td>
+                <button class="btn btn-sm btn-success" onclick="editCustomer(1)">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteCustomer(1)">Delete</button>
+            </td>
+        </tr>
+        <!-- Additional rows can be dynamically added here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Optional: Add some styles to make it look nice -->
+<style>
+    .customer-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .customer-table th, .customer-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .customer-table th {
+        background-color: #f4f4f4;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #1E90FF;
+        color: #fff;
+        border: none;
+    }
+
+    .btn-sm {
+        font-size: 12px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<!-- You can add JavaScript functions for actions like edit and delete -->
+<script>
+    function addCustomer() {
+        // Logic to open a form or modal to add a new customer
+        alert('Add New Customer form will go here.');
+    }
+
+    function editCustomer(customerId) {
+        // Logic to edit customer details
+        alert('Edit customer ' + customerId);
+    }
+
+    function deleteCustomer(customerId) {
+        // Logic to delete customer
+        var confirmDelete = confirm('Are you sure you want to delete this customer?');
+        if (confirmDelete) {
+            alert('Customer ' + customerId + ' deleted');
+            // You can add your delete logic here, e.g., make an AJAX call to delete
+        }
+    }
+
+    // Handle Add New Customer Button click
+    document.getElementById('addCustomerBtn').addEventListener('click', addCustomer);
+</script>
+

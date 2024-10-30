@@ -28,9 +28,11 @@ public class Order {
 
     private String orderNumber;
 
+    private String description;
+
     // Method to generate the order number
     @PrePersist
     public void generateOrderNumber() {
-        this.orderNumber = "TIK" + id;
+        this.orderNumber = "ORD" + id;
     }
 }

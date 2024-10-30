@@ -4,39 +4,49 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
+    private final UserRepository userRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        // Fetch all users and filter out admins
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getRole().equalsIgnoreCase("admin"))
+                .collect(Collectors.toList());
     }
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
-    public User updateUser(Long id, User user) {
-        User existingUser = userRepository.findById(id).orElse(null);
-        if (existingUser != null) {
-            existingUser.setFullName(user.getFullName());
-            existingUser.setUsername(user.getUsername());
-            existingUser.setPassword(user.getPassword());
-            existingUser.setPhone(user.getPhone());
-            existingUser.setRole(user.getRole());  // Update role
-            return userRepository.save(existingUser);
+    // Method to authenticate users based on username and password
+    public User authenticateUser(String username, String password) {
+        // Query the repository to find a user with the provided username
+        User user = userRepository.findByUsername(username);
+
+        // If user is found and password matches, return the user
+        if (user != null && user.getPassword().equals(password)) {
+            return user;
+        } else {
+            return null; // Authentication failed
         }
-        return null;
+    }
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
