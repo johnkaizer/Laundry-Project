@@ -83,19 +83,30 @@ public class UserController {
         // Authenticate user
         User user = userService.authenticateUser(username, password);
         if (user != null) {
-            // Save the username and role in preferences
+            // Save the user ID, username, and role in preferences
             Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+            prefs.putLong("loggedInUserId", user.getId());
             prefs.put("loggedInUsername", username);
             prefs.put("loggedInUserRole", user.getRole());
 
-            // Redirect all users to the unified dashboard
-            return new ModelAndView(new RedirectView("/dashboard"));
+            // Redirect based on user role
+            if ("ADMIN".equals(user.getRole())) {
+                return new ModelAndView(new RedirectView("/dashboard"));
+            } else if ("USER".equals(user.getRole())) {
+                return new ModelAndView(new RedirectView("/empdashboard"));
+            } else {
+                // Handle unknown roles if needed
+                redirectAttributes.addFlashAttribute("errorMessage", "Access denied: Unknown role");
+                return new ModelAndView(new RedirectView("/login"));
+            }
         } else {
             // Invalid credentials; redirect to the login page with error
             redirectAttributes.addFlashAttribute("errorMessage", "Invalid username or password");
             return new ModelAndView(new RedirectView("/login"));
         }
     }
+
+
 
     // GET: Get current logged-in username
     @GetMapping("/currentUsername")
@@ -122,4 +133,28 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    @GetMapping("/currentUserId")
+    public ResponseEntity<Long> getCurrentUserId() {
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        Long loggedInUserId = prefs.getLong("loggedInUserId", -1L);
+        if (loggedInUserId != -1L) {
+            return new ResponseEntity<>(loggedInUserId, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    // POST: Handle logout
+    @PostMapping("/logout")
+    public ModelAndView logout() {
+        // Clear stored preferences
+        Preferences prefs = Preferences.userNodeForPackage(UserController.class);
+        prefs.remove("loggedInUserId");
+        prefs.remove("loggedInUsername");
+        prefs.remove("loggedInUserRole");
+
+        // Redirect to login page
+        return new ModelAndView(new RedirectView("/"));
+    }
+
+
 }

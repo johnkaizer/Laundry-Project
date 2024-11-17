@@ -1,0 +1,132 @@
+<div>
+    <h3>Orders</h3>
+
+    <!-- Add New Order Button -->
+    <button id="addOrderBtn" class="btn btn-primary">Add New Order</button>
+
+    <!-- Search Input -->
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search orders...">
+
+    <!-- Orders Table -->
+    <table id="ordersTable" class="orders-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Customer Phone Number</th>
+            <th>Service Type</th>
+            <th>Status</th>
+            <th>Laundry Weight (kg)</th>
+            <th>Total Amount (Ksh)</th>
+            <th>Order Date</th>
+            <th>Order Number</th>
+            <th>Actions</th> <!-- Column for Edit/Delete -->
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Data will be dynamically filled here using JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Link to the external CSS file -->
+<link rel="stylesheet" href="path/to/styles.css">
+
+<!-- JavaScript for handling search and button actions -->
+<script>
+    // Fetch orders and load them into the table
+    async function fetchOrders() {
+        const response = await fetch('/api/orders');
+        const orders = await response.json();
+        const ordersTableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+        ordersTableBody.innerHTML = ''; // Clear current rows
+
+        orders.forEach((order, index) => {
+            const row = ordersTableBody.insertRow();
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${order.customerPhoneNumber}</td>
+                <td>${order.serviceType}</td>
+                <td>${order.status}</td>
+                <td>${order.laundryWeight}</td>
+                <td>${order.totalAmount}</td>
+                <td>${order.orderDate}</td>
+                <td>${order.orderNumber}</td>
+                <td>
+                    <button class="btn btn-sm btn-success" onclick="editOrder(${order.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteOrder(${order.id})">Delete</button>
+                    <button class="btn btn-sm btn-danger" onclick="completeOrder(${order.id})">Complete</button>
+                </td>
+            `;
+        });
+    }
+
+    // Add New Order
+    document.getElementById('addOrderBtn').addEventListener('click', () => {
+        alert('Add New Order form will go here.');
+    });
+
+    // Edit Order
+    function editOrder(orderId) {
+        alert('Edit order ' + orderId);
+    }
+
+    // Complete Order
+    async function completeOrder(orderId) {
+        const response = await fetch(`/api/orders/${orderId}/mark-done`, { method: 'PUT' });
+        if (response.ok) {
+            alert('Order marked as completed');
+            fetchOrders(); // Reload the orders after completing one
+        } else {
+            alert('Error completing order');
+        }
+    }
+
+    // Delete Order
+    async function deleteOrder(orderId) {
+        const confirmDelete = confirm('Are you sure you want to delete this order?');
+        if (confirmDelete) {
+            const response = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Order deleted');
+                fetchOrders(); // Reload the orders after deletion
+            } else {
+                alert('Error deleting order');
+            }
+        }
+    }
+
+    // Search Functionality
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('ordersTable');
+        const tr = table.getElementsByTagName('tr');
+
+        // Loop through all table rows, and hide those that don't match the search query
+        for (let i = 1; i < tr.length; i++) {
+            const tdArray = tr[i].getElementsByTagName('td');
+            let rowContainsSearchTerm = false;
+
+            // Loop through all columns in the row
+            for (let j = 0; j < tdArray.length; j++) {
+                if (tdArray[j]) {
+                    const cellValue = tdArray[j].textContent || tdArray[j].innerText;
+                    if (cellValue.toLowerCase().indexOf(filter) > -1) {
+                        rowContainsSearchTerm = true;
+                        break;
+                    }
+                }
+            }
+
+            // Show or hide the row based on the search query
+            if (rowContainsSearchTerm) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    });
+
+    // Load orders initially
+    fetchOrders();
+</script>

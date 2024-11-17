@@ -15,6 +15,10 @@ public class LaundryController {
     public String dashboard() {
         return "dashboard";
     }
+    @GetMapping("/empdashboard")
+    public String empdashboard() {
+        return "empdashboard";
+    }
     @GetMapping("/fragments/{page}")
     public String loadPage(@PathVariable String page) {
         return "fragments/" + page;

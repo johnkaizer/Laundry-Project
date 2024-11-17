@@ -5,8 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 @RestController
@@ -81,14 +79,15 @@ public class OrderController {
         }
     }
 
-    // Mark order as "Done" and send SMS notification to customer
+    // Mark order as completed
     @PutMapping("/{id}/mark-done")
     public ResponseEntity<Order> markOrderAsDone(@PathVariable Long id) {
-        try {
-            Order updatedOrder = orderService.markOrderAsDone(id);
-            return ResponseEntity.ok(updatedOrder);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        Order order = orderService.getOrderById(id);
+        if (order != null) {
+            order.setStatus("completed");
+            return ResponseEntity.ok(orderService.saveOrder(order));
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }

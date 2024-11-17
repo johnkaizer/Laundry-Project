@@ -53,4 +53,3 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.findByName(name));
     }
 }
-
