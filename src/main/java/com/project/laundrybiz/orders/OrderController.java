@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -82,12 +81,18 @@ public class OrderController {
     // Mark order as completed
     @PutMapping("/{id}/mark-done")
     public ResponseEntity<Order> markOrderAsDone(@PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
-        if (order != null) {
-            order.setStatus("completed");
-            return ResponseEntity.ok(orderService.saveOrder(order));
-        } else {
-            return ResponseEntity.notFound().build();
+        try {
+            Order updatedOrder = orderService.markOrderAsDone(id);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
         }
     }
+
+    @GetMapping("/summary")
+    public ResponseEntity<OrderSummary> getOrderSummary() {
+        OrderSummary summary = orderService.getOrderSummary();
+        return ResponseEntity.ok(summary);
+    }
+
 }

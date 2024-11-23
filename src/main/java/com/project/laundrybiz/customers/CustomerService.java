@@ -41,5 +41,9 @@ public class CustomerService {
     public List<Customer> findByName(String name) {
         return customerRepository.findByNameContainingIgnoreCase(name);
     }
+
+    public long countCustomers() {
+        return customerRepository.count();
+    }
 }
 

@@ -1,250 +1,306 @@
-<div>
-    <h3>Customer Management</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+    <style>
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .customer-table th, .customer-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .customer-table th {
+            background-color: #f4f4f4;
+        }
+        .btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #1E90FF;
+            color: white;
+            border: none;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.8;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .search-bar {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<!-- Button to open the Add Customer modal -->
+<button class="btn btn-primary" id="addCustomerButton">Add Customer</button>
 
-    <!-- Add New Customer Button -->
-    <button id="addCustomerBtn" class="btn btn-primary">Add New Customer</button>
+<!-- Search bar -->
+<label for="searchInput"></label><input type="text" id="searchInput" class="search-bar" placeholder="Search customers..." oninput="filterCustomers()">
 
-    <!-- Search Input -->
-    <input type="text" id="searchInput" class="search-bar" placeholder="Search customers..." oninput="filterCustomers()">
-
-    <!-- Customer Table -->
-    <table id="customerTable" class="customer-table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Customer Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- Data will be dynamically filled here using JavaScript -->
-        </tbody>
-    </table>
-</div>
-
-<!-- Add/Edit Customer Modal -->
-<div id="customerModal" class="modal" style="display: none;">
+<!-- Customer table -->
+<table class="customer-table" id="customerTable">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<!-- Modal for Adding Customer -->
+<div id="addCustomerModal" class="modal">
     <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
-        <h3 id="modalTitle">Add Customer</h3>
-        <form id="customerForm">
-            <input type="hidden" id="customerId">
-            <label for="customerName">Customer Name</label>
-            <input type="text" id="customerName" required>
-            <label for="customerEmail">Email</label>
-            <input type="email" id="customerEmail" required>
-            <label for="customerPhone">Phone</label>
-            <input type="text" id="customerPhone" required>
-            <label for="customerAddress">Address</label>
-            <input type="text" id="customerAddress" required>
+        <span class="close" id="closeAddModalButton">&times;</span>
+        <h2>Add Customer</h2>
+        <form id="addCustomerForm">
+            <div>
+                <label for="addCustomerName">Name:</label>
+                <input type="text" id="addCustomerName" required>
+            </div>
+            <div>
+                <label for="addCustomerEmail">Email:</label>
+                <input type="email" id="addCustomerEmail" required>
+            </div>
+            <div>
+                <label for="addCustomerPhone">Phone:</label>
+                <input type="text" id="addCustomerPhone" required>
+            </div>
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
 </div>
 
-<style>
-    .customer-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    .customer-table th, .customer-table td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    .customer-table th {
-        background-color: #f4f4f4;
-    }
-
-    .btn {
-        padding: 5px 10px;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #1E90FF;
-        color: white;
-        border: none;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .btn:hover {
-        opacity: 0.8;
-    }
-
-    .modal {
-        display: block;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-        padding-top: 60px;
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .close:hover, .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .search-bar {
-        margin-top: 15px;
-        padding: 10px;
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 16px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-</style>
+<!-- Modal for Editing Customer -->
+<div id="editCustomerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeEditModalButton">&times;</span>
+        <h2>Edit Customer</h2>
+        <form id="editCustomerForm">
+            <input type="hidden" id="editCustomerId">
+            <div>
+                <label for="editCustomerName">Name:</label>
+                <input type="text" id="editCustomerName" required>
+            </div>
+            <div>
+                <label for="editCustomerEmail">Email:</label>
+                <input type="email" id="editCustomerEmail" required>
+            </div>
+            <div>
+                <label for="editCustomerPhone">Phone:</label>
+                <input type="text" id="editCustomerPhone" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</div>
 
 <script>
-    let customersData = []; // Store fetched customer data
+    (function () {
+        const apiUrl = '/api/customers';
+        const customerTableBody = document.querySelector('#customerTable tbody');
 
-    // Initialize by fetching customers when DOM content is loaded
-    document.addEventListener("DOMContentLoaded", () => {
-        fetchCustomers();
-    });
+        // Modals and Forms
+        const addCustomerModal = document.getElementById('addCustomerModal');
+        const editCustomerModal = document.getElementById('editCustomerModal');
+        const addCustomerForm = document.getElementById('addCustomerForm');
+        const editCustomerForm = document.getElementById('editCustomerForm');
 
-    // Fetch and display customers
-    function fetchCustomers() {
-        fetch("/api/customers")
-            .then(response => response.json())
-            .then(data => {
-                customersData = data;
-                populateTable(data);
-            })
-            .catch(error => console.error("Error fetching customers:", error));
-    }
+        // Buttons
+        const addCustomerButton = document.getElementById('addCustomerButton');
+        const closeAddModalButton = document.getElementById('closeAddModalButton');
+        const closeEditModalButton = document.getElementById('closeEditModalButton');
 
-    // Populate the table with customer data
-    function populateTable(customers) {
-        const tableBody = document.querySelector("#customerTable tbody");
-        tableBody.innerHTML = "";
-        customers.forEach((customer, index) => {
-            const row = `
-        <tr>
-            <td>${index + 1}</td>
-            <td>${customer.name}</td>
-            <td>${customer.email}</td>
-            <td>${customer.phone}</td>
-            <td>${customer.address}</td>
-            <td>
-                <button class="btn btn-success" onclick="editCustomer(${customer.id})">Edit</button>
-                <button class="btn btn-danger" onclick="deleteCustomer(${customer.id})">Delete</button>
-            </td>
-        </tr>`;
-            tableBody.innerHTML += row;
-        });
-    }
+        // Open Modals
+        addCustomerButton.addEventListener('click', () => openModal(addCustomerModal));
+        closeAddModalButton.addEventListener('click', () => closeModal(addCustomerModal));
+        closeEditModalButton.addEventListener('click', () => closeModal(editCustomerModal));
 
-    // Open modal for adding/editing customer
-    function openModal(title, customer = null) {
-        document.getElementById("modalTitle").textContent = title;
-        document.getElementById("customerId").value = customer ? customer.id : "";
-        document.getElementById("customerName").value = customer ? customer.name : "";
-        document.getElementById("customerEmail").value = customer ? customer.email : "";
-        document.getElementById("customerPhone").value = customer ? customer.phone : "";
-        document.getElementById("customerAddress").value = customer ? customer.address : "";
-        document.getElementById("customerModal").style.display = "block";
-    }
-
-    // Close modal
-    function closeModal() {
-        document.getElementById("customerModal").style.display = "none";
-    }
-
-    // Add or update customer
-    function addOrUpdateCustomer(event) {
-        event.preventDefault();
-        const id = document.getElementById("customerId").value;
-        const method = id ? "PUT" : "POST";
-        const url = id ? `/api/customers/${id}` : "/api/customers";
-
-        const customer = {
-            name: document.getElementById("customerName").value,
-            email: document.getElementById("customerEmail").value,
-            phone: document.getElementById("customerPhone").value,
-            address: document.getElementById("customerAddress").value,
-        };
-
-        fetch(url, {
-            method: method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(customer),
-        })
-            .then(() => {
-                fetchCustomers();
-                closeModal();
-            })
-            .catch(error => console.error("Error saving customer:", error));
-    }
-
-    // Delete customer
-    function deleteCustomer(id) {
-        if (confirm("Are you sure you want to delete this customer?")) {
-            fetch(`/api/customers/${id}`, { method: "DELETE" })
-                .then(() => fetchCustomers())
-                .catch(error => console.error("Error deleting customer:", error));
+        function openModal(modal) {
+            modal.style.display = 'block';
         }
-    }
 
-    // Edit customer details
-    function editCustomer(id) {
-        fetch(`/api/customers/${id}`)
-            .then(response => response.json())
-            .then(customer => openModal("Edit Customer", customer))
-            .catch(error => console.error("Error fetching customer:", error));
-    }
+        function closeModal(modal) {
+            modal.style.display = 'none';
+        }
 
-    // Filter customers based on search input
-    function filterCustomers() {
-        const searchQuery = document.getElementById("searchInput").value.toLowerCase();
-        const filteredCustomers = customersData.filter(customer =>
-            customer.name.toLowerCase().includes(searchQuery) ||
-            customer.email.toLowerCase().includes(searchQuery) ||
-            customer.phone.toLowerCase().includes(searchQuery)
-        );
-        populateTable(filteredCustomers);
-    }
+        async function fetchCustomers() {
+            try {
+                const response = await fetch(apiUrl);
+                const customers = await response.json();
+                populateTable(customers);
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+            }
+        }
 
-    // Attach form submit event
-    document.getElementById("customerForm").addEventListener("submit", addOrUpdateCustomer);
+        function populateTable(customers) {
+            customerTableBody.innerHTML = '';
+            customers.forEach((customer, index) => {
+                const row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.email}</td>
+                    <td>${customer.phone}</td>
+                    <td>
+                        <button class="btn btn-success" data-id="${customer.id}">Edit</button>
+                        <button class="btn btn-danger" data-id="${customer.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+                customerTableBody.insertAdjacentHTML('beforeend', row);
+            });
 
+            // Attach event listeners
+            customerTableBody.querySelectorAll('.btn-success').forEach(btn =>
+                btn.addEventListener('click', () => editCustomer(btn.getAttribute('data-id')))
+            );
+            customerTableBody.querySelectorAll('.btn-danger').forEach(btn =>
+                btn.addEventListener('click', () => deleteCustomer(btn.getAttribute('data-id')))
+            );
+        }
 
+        // Add Customer
+        addCustomerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const customer = {
+                name: document.getElementById('addCustomerName').value,
+                email: document.getElementById('addCustomerEmail').value,
+                phone: document.getElementById('addCustomerPhone').value,
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(customer),
+                });
+
+                if (response.ok) {
+                    closeModal(addCustomerModal);
+                    fetchCustomers();
+                } else {
+                    console.error('Error adding customer:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error adding customer:', error);
+            }
+        });
+
+        // Edit Customer
+        async function editCustomer(id) {
+            try {
+                const response = await fetch(`${apiUrl}/${id}`);
+                const customer = await response.json();
+                openModal(editCustomerModal);
+
+                document.getElementById('editCustomerId').value = customer.id;
+                document.getElementById('editCustomerName').value = customer.name;
+                document.getElementById('editCustomerEmail').value = customer.email;
+                document.getElementById('editCustomerPhone').value = customer.phone;
+            } catch (error) {
+                console.error('Error fetching customer details:', error);
+            }
+        }
+
+        editCustomerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const customer = {
+                id: document.getElementById('editCustomerId').value,
+                name: document.getElementById('editCustomerName').value,
+                email: document.getElementById('editCustomerEmail').value,
+                phone: document.getElementById('editCustomerPhone').value,
+            };
+
+            try {
+                const response = await fetch(`${apiUrl}/${customer.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(customer),
+                });
+
+                if (response.ok) {
+                    closeModal(editCustomerModal);
+                    fetchCustomers();
+                } else {
+                    console.error('Error updating customer:', await response.text());
+                }
+            } catch (error) {
+                console.error('Error updating customer:', error);
+            }
+        });
+
+        // Delete Customer
+        async function deleteCustomer(id) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                try {
+                    const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        fetchCustomers();
+                    } else {
+                        console.error('Error deleting customer:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error deleting customer:', error);
+                }
+            }
+        }
+
+        fetchCustomers();
+    })();
 </script>
+</body>
+</html>

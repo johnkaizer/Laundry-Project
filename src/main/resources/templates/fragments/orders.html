@@ -41,37 +41,6 @@
     .orders-table th {
         background-color: #f4f4f4;
     }
-
-    .btn {
-        padding: 5px 10px;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #1E90FF;
-        color: #fff;
-        border: none;
-    }
-
-    .btn-sm {
-        font-size: 12px;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: #fff;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-    .btn:hover {
-        opacity: 0.8;
-    }
-
     .search-bar {
         margin-top: 15px;
         padding: 10px;
@@ -86,17 +55,35 @@
 <!-- JavaScript for handling search functionality and loading orders -->
 <script>
     // Fetch orders from the backend API and populate the table
-    function loadOrders() {
-        fetch('http://localhost:8080/api/orders')
-            .then(response => response.json())
-            .then(orders => {
-                const tableBody = document.querySelector('#ordersTable tbody');
-                tableBody.innerHTML = ''; // Clear any existing rows
+    (function () {
+        class OrderManager {
+            constructor() {
+                this.endpoints = {
+                    getAllOrders: '/api/orders',
+                    searchOrders: '/api/orders/search/by-order-number',
+                    deleteOrder: '/api/orders', // Append ID when deleting
+                };
+                this.tableBody = document.querySelector('#ordersTable tbody');
+                this.searchInput = document.getElementById('searchInput');
+            }
 
-                // Populate the table with the fetched orders
+            // Fetch and display all orders
+            async fetchOrders() {
+                try {
+                    const orders = await fetch(this.endpoints.getAllOrders).then(res => res.json());
+                    this.renderOrders(orders);
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                }
+            }
+
+            // Render orders into the table
+            renderOrders(orders) {
+                this.tableBody.innerHTML = ''; // Clear existing rows
+
                 orders.forEach((order, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+                    const row = `
+                    <tr>
                         <td>${index + 1}</td>
                         <td>${order.customerPhoneNumber}</td>
                         <td>${order.serviceType}</td>
@@ -105,45 +92,49 @@
                         <td>${order.totalAmount}</td>
                         <td>${new Date(order.orderDate).toLocaleString()}</td>
                         <td>${order.orderNumber}</td>
-                    `;
-                    tableBody.appendChild(row);
+                    </tr>
+                `;
+                    this.tableBody.insertAdjacentHTML('beforeend', row);
                 });
-            })
-            .catch(error => console.error('Error loading orders:', error));
-    }
+            }
 
-    // Call loadOrders function on page load
-    window.onload = loadOrders;
+            // Search functionality
+            initSearch() {
+                this.searchInput.addEventListener('keyup', () => {
+                    const filter = this.searchInput.value.toLowerCase();
+                    const rows = this.tableBody.getElementsByTagName('tr');
 
-    // Search Functionality
-    document.getElementById('searchInput').addEventListener('keyup', function () {
-        var input = document.getElementById('searchInput');
-        var filter = input.value.toLowerCase();
-        var table = document.getElementById('ordersTable');
-        var tr = table.getElementsByTagName('tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        const rowContainsSearchTerm = Array.from(cells).some(cell =>
+                            cell.textContent.toLowerCase().includes(filter)
+                        );
 
-        // Loop through all table rows, and hide those that don't match the search query
-        for (var i = 1; i < tr.length; i++) {
-            var tdArray = tr[i].getElementsByTagName('td');
-            var rowContainsSearchTerm = false;
+                        rows[i].style.display = rowContainsSearchTerm ? '' : 'none';
+                    }
+                });
+            }
 
-            // Loop through all columns in the row
-            for (var j = 0; j < tdArray.length; j++) {
-                if (tdArray[j]) {
-                    var cellValue = tdArray[j].textContent || tdArray[j].innerText;
-                    if (cellValue.toLowerCase().indexOf(filter) > -1) {
-                        rowContainsSearchTerm = true;
-                        break;
+            // Delete order
+            async deleteOrder(orderId) {
+                if (confirm('Are you sure you want to delete this order?')) {
+                    try {
+                        await fetch(`${this.endpoints.deleteOrder}/${orderId}`, {
+                            method: 'DELETE',
+                        });
+                        alert('Order deleted successfully!');
+                        this.fetchOrders(); // Refresh the table
+                    } catch (error) {
+                        console.error('Error deleting order:', error);
+                        alert('Failed to delete order. Please try again.');
                     }
                 }
             }
-
-            // Show or hide the row based on the search query
-            if (rowContainsSearchTerm) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
         }
-    });
+
+        // Initialize the OrderManager class and fetch orders on page load
+        const orderManager = new OrderManager();
+        orderManager.fetchOrders();
+        orderManager.initSearch();
+    })();
 </script>

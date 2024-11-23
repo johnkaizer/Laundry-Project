@@ -52,4 +52,22 @@ public class CustomerController {
     public ResponseEntity<List<Customer>> searchCustomersByName(@RequestParam String name) {
         return ResponseEntity.ok(customerService.findByName(name));
     }
+    // Update a customer
+    @PutMapping("/{id}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
+        Optional<Customer> existingCustomer = customerService.getCustomerById(id);
+        if (existingCustomer.isPresent()) {
+            customer.setId(id); // Ensure the ID is set for updating
+            return ResponseEntity.ok(customerService.saveCustomer(customer));
+        }
+        return ResponseEntity.notFound().build();
+    }
+    // Add this method to your CustomerController class
+    @GetMapping("/count")
+    public ResponseEntity<Long> getTotalCustomers() {
+        long totalCustomers = customerService.countCustomers();
+        return ResponseEntity.ok(totalCustomers);
+    }
+
+
 }

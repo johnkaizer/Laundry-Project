@@ -163,133 +163,97 @@
 </div>
 
 <script>
-    // Fetch and display services
-    document.addEventListener('DOMContentLoaded', function() {
-        fetchServices();
-    });
+    (() => {
+        // Encapsulating all logic inside a self-executing function
 
-    // Fetch services from API
-    function fetchServices() {
-        fetch('/api/types')
-            .then(response => response.json())
-            .then(services => {
-                const tableBody = document.getElementById('services-table-body');
-                tableBody.innerHTML = ''; // Clear the table before adding new rows
+        const fetchServices = () => {
+            fetch('/api/types')
+                .then(response => response.json())
+                .then(services => {
+                    const tableBody = document.getElementById('services-table-body');
+                    tableBody.innerHTML = '';
 
-                services.forEach(service => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                    <td>${service.name}</td>
-                    <td>${service.description || "No description"}</td>
-                    <td>${service.pricePerUnit}</td>
-                    <td>
-                        <button class="btn btn-success" onclick="editService(${service.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteService(${service.id})">Delete</button>
-                    </td>
-                `;
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(error => console.error('Error fetching services:', error));
-    }
-
-    // Function to search services by name
-    function searchServices() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const rows = document.querySelectorAll('#services-table-body tr');
-
-        rows.forEach(row => {
-            const name = row.querySelector('td').textContent.toLowerCase();
-            if (name.includes(searchTerm)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    // Function to delete a service
-    function deleteService(id) {
-        if (confirm('Are you sure you want to delete this service?')) {
-            fetch(`/api/types/${id}`, {
-                method: 'DELETE',
-            })
-                .then(() => {
-                    alert('Service deleted successfully');
-                    fetchServices();  // Refresh the services list after deletion
+                    services.forEach(service => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${service.name}</td>
+                            <td>${service.description || "No description"}</td>
+                            <td>${service.pricePerUnit}</td>
+                            <td>
+                                <button class="btn btn-success" onclick="editService(${service.id})">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteService(${service.id})">Delete</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
                 })
-                .catch(error => console.error('Error deleting service:', error));
-        }
-    }
-
-    // Function to open the Add Service Modal
-    function openAddServiceModal() {
-        document.getElementById('add-service-modal').style.display = 'block';
-        document.getElementById('modalTitle').textContent = "Add Service";
-        document.getElementById('add-service-form').reset(); // Clear form
-    }
-
-    // Function to close the Add Service Modal
-    function closeAddServiceModal() {
-        document.getElementById('add-service-modal').style.display = 'none';
-    }
-
-    // Function to handle Add/Edit service
-    document.getElementById('add-service-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form submission
-
-        const serviceName = document.getElementById('service-name').value;
-        const serviceDescription = document.getElementById('service-description').value;
-        const servicePrice = parseFloat(document.getElementById('service-price').value);
-
-        const service = {
-            name: serviceName,
-            description: serviceDescription,
-            pricePerUnit: servicePrice
+                .catch(error => console.error('Error fetching services:', error));
         };
 
-        // Determine if this is an Edit or Add request based on form title
-        const modalTitle = document.getElementById('modalTitle').textContent;
-        const isEdit = modalTitle === "Edit Service";
+        const searchServices = () => {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#services-table-body tr');
 
-        const method = isEdit ? 'PUT' : 'POST';
-        const serviceId = isEdit ? document.getElementById('service-id').value : '';
-
-        // Make a POST/PUT request to add or edit the service
-        fetch(`/api/types${isEdit ? '/' + serviceId : ''}`, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(service)
-        })
-            .then(response => response.json())
-            .then(() => {
-                alert(isEdit ? 'Service updated successfully' : 'Service added successfully');
-                closeAddServiceModal(); // Close the modal
-                fetchServices(); // Refresh the services list
-            })
-            .catch(error => {
-                console.error('Error adding or updating service:', error);
-                alert('Failed to add or update service');
+            rows.forEach(row => {
+                const name = row.querySelector('td').textContent.toLowerCase();
+                row.style.display = name.includes(searchTerm) ? '' : 'none';
             });
-    });
+        };
 
-    // Function to handle editing a service
-    function editService(id) {
-        fetch(`/api/types/${id}`)
-            .then(response => response.json())
-            .then(service => {
-                document.getElementById('service-name').value = service.name;
-                document.getElementById('service-description').value = service.description;
-                document.getElementById('service-price').value = service.pricePerUnit;
-                document.getElementById('modalTitle').textContent = "Edit Service";
-                document.getElementById('add-service-modal').style.display = 'block';
-                document.getElementById('service-id').value = service.id; // Store the ID for editing
+        const deleteService = id => {
+            if (confirm('Are you sure you want to delete this service?')) {
+                fetch(`/api/types/${id}`, { method: 'DELETE' })
+                    .then(() => {
+                        alert('Service deleted successfully');
+                        fetchServices();
+                    })
+                    .catch(error => console.error('Error deleting service:', error));
+            }
+        };
+
+        const openModal = () => {
+            document.getElementById('add-service-modal').style.display = 'block';
+            document.getElementById('add-service-form').reset();
+        };
+
+        const closeModal = () => {
+            document.getElementById('add-service-modal').style.display = 'none';
+        };
+
+        const handleFormSubmit = event => {
+            event.preventDefault();
+
+            const service = {
+                name: document.getElementById('service-name').value,
+                description: document.getElementById('service-description').value,
+                pricePerUnit: parseFloat(document.getElementById('service-price').value)
+            };
+
+            const isEdit = document.getElementById('modalTitle').textContent === "Edit Service";
+            const method = isEdit ? 'PUT' : 'POST';
+            const serviceId = isEdit ? document.getElementById('service-id').value : '';
+
+            fetch(`/api/types${isEdit ? '/' + serviceId : ''}`, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(service)
             })
-            .catch(error => console.error('Error fetching service:', error));
-    }
-</script>
+                .then(() => {
+                    alert(isEdit ? 'Service updated successfully' : 'Service added successfully');
+                    closeModal();
+                    fetchServices();
+                })
+                .catch(error => console.error('Error saving service:', error));
+        };
 
+        document.getElementById('addServiceBtn').addEventListener('click', openModal);
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('searchInput').addEventListener('input', searchServices);
+        document.getElementById('add-service-form').addEventListener('submit', handleFormSubmit);
+
+        // Fetch services on window load
+        window.onload = fetchServices;
+    })();
+</script>
 </body>
 </html>

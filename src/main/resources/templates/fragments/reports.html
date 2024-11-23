@@ -1,5 +1,110 @@
-<!-- templates/fragments/orders.html -->
-<div>
-    <h3>Reports</h3>
-    <p>Here you can manage all the Reports.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunshine Dry Cleaners - Reports</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .summary-cards {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .card h3 {
+            margin: 10px 0;
+            color: #555;
+        }
+
+        canvas {
+            background: #fff;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sunshine Dry Cleaners - Reports</h1>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p id="totalAmount">Ksh 0</p>
+        </div>
+        <div class="card">
+            <h3>Total Orders</h3>
+            <p id="totalOrder">0</p>
+        </div>
+        <div class="card">
+            <h3>Total Customers</h3>
+            <p id="totalCustomers">0</p>
+        </div>
+    </div>
 </div>
+
+<script>
+    // Fetch all necessary report data from API
+    const fetchReportData = async () => {
+        try {
+            // Fetch summary data (amount, orders, etc.)
+            const summaryResponse = await fetch('/api/orders/summary'); // API endpoint for orders summary
+            if (!summaryResponse.ok) throw new Error('Failed to fetch summary data');
+            const summaryData = await summaryResponse.json();
+
+            // Fetch total customers count
+            const customerResponse = await fetch('/api/customers/count'); // API endpoint for total customers
+            if (!customerResponse.ok) throw new Error('Failed to fetch total customers');
+            const totalCustomers = await customerResponse.json();
+
+            return {
+                totalAmount: summaryData.totalAmount,
+                totalOrders: summaryData.totalOrders,
+                totalCustomers: totalCustomers
+            };
+        } catch (error) {
+            console.error('Error fetching report data:', error);
+            return { totalAmount: 0, totalOrders: 0, totalCustomers: 0 }; // Fallback values
+        }
+    };
+
+    // Render data on page load
+    const renderCharts = async () => {
+        const reportData = await fetchReportData();
+
+        // Update the values in summary cards
+        document.getElementById('totalAmount').textContent = `Ksh ${reportData.totalAmount}`;
+        document.getElementById('totalOrder').textContent = reportData.totalOrders;
+        document.getElementById('totalCustomers').textContent = reportData.totalCustomers; // Update total customers
+    };
+
+    // Wait for the page to load and then call the render function
+    document.addEventListener('DOMContentLoaded', renderCharts);
+</script>
+</body>
+</html>

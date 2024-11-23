@@ -63,13 +63,20 @@ public class OrderService {
         return orderRepository.findByStatus(status);
     }
 
-    // Update order status to "Done" and send an SMS notification
     public Order markOrderAsDone(Long id) throws Exception {
         Order order = getOrderById(id);
         if (order != null) {
-            order.setStatus("Done");  // Update the status to Done
-            orderRepository.save(order);  // Save the updated order
-            sendCompletionSMS(order.getCustomerPhoneNumber(), order.getOrderNumber());  // Send SMS notification
+            order.setStatus("completed");
+            order = orderRepository.save(order);  // Save the updated order
+
+            // Send SMS notification
+            try {
+                sendCompletionSMS(order.getCustomerPhoneNumber(), order.getOrderNumber());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Failed to send SMS for order ID: " + id);
+                // Optionally, log the error or revert the status if SMS is critical
+            }
             return order;
         } else {
             throw new Exception("Order not found");
@@ -79,13 +86,11 @@ public class OrderService {
     // Send an SMS notification to the customer
     private void sendCompletionSMS(String phoneNumber, String orderNumber) {
         try {
-            String message = "Your order " + orderNumber + " is now ready for pickup. Thank you for choosing our service!";
-            System.out.println("Sending SMS to: " + phoneNumber);
+            String message = "Your order " + orderNumber + " is now ready for pickup. Thank you for choosing our service! Shine Dry Cleaners";
+            System.out.println("Attempting to send SMS to: " + phoneNumber);
 
-            // Send the message and capture the response
             List<Recipient> response = smsService.send(message, new String[]{phoneNumber}, true);
 
-            // Log the response from Africa's Talking
             for (Recipient recipient : response) {
                 System.out.println("Recipient: " + recipient.number);
                 System.out.println("Status: " + recipient.status);
@@ -95,9 +100,15 @@ public class OrderService {
 
             System.out.println("SMS sent successfully.");
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Failed to send SMS to: " + phoneNumber);
+            e.printStackTrace();
         }
     }
 
+
+    public OrderSummary getOrderSummary() {
+        long totalOrders = orderRepository.count(); // Count total orders
+        double totalAmount = orderRepository.sumTotalAmount(); // Sum total amounts
+        return new OrderSummary(totalOrders, totalAmount);
+    }
 }

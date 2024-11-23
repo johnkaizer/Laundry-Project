@@ -1,3 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <style>
+        /* Table Styles */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .orders-table th, .orders-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .orders-table th {
+            background-color: #f4f4f4;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #1E90FF;
+            color: white;
+            border: none;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Search Bar Styles */
+        .search-bar {
+            margin-top: 15px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
 <div>
     <h3>Employee Management</h3>
 
@@ -25,228 +124,188 @@
     </table>
 </div>
 
-<!-- Add/Edit Employee Modal -->
-<div id="employeeModal" class="modal" style="display: none;">
+<!-- Add Employee Modal -->
+<div id="addEmployeeModal" class="modal" style="display: none;">
     <div class="modal-content">
-        <span id="closeModal" class="close">&times;</span>
-        <h3 id="modalTitle">Add Employee</h3>
-        <form id="employeeForm">
-            <input type="hidden" id="employeeId">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" required>
-            <label for="username">Username</label>
-            <input type="text" id="username" required>
-            <label for="phone">Phone</label>
-            <input type="text" id="phone" required>
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
+        <span class="close" id="closeAddModal">&times;</span>
+        <h3>Add Employee</h3>
+        <form id="addEmployeeForm">
+            <label for="addFullName">Full Name</label>
+            <input type="text" id="addFullName" required>
+            <label for="addUsername">Username</label>
+            <input type="text" id="addUsername" required>
+            <label for="addPhone">Phone</label>
+            <input type="text" id="addPhone" required>
+            <label for="addPassword">Password</label>
+            <input type="password" id="addPassword" required>
             <button type="submit" class="btn btn-primary">Save</button>
         </form>
     </div>
 </div>
 
-<style>
-    .orders-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
+<!-- Edit Employee Modal -->
+<div id="editEmployeeModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" id="closeEditModal">&times;</span>
+        <h3>Edit Employee</h3>
+        <form id="editEmployeeForm">
+            <input type="hidden" id="editEmployeeId">
+            <label for="editFullName">Full Name</label>
+            <input type="text" id="editFullName" required>
+            <label for="editUsername">Username</label>
+            <input type="text" id="editUsername" readonly>
+            <label for="editPhone">Phone</label>
+            <input type="text" id="editPhone" required>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
 
-    .orders-table th, .orders-table td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: left;
-    }
-
-    .orders-table th {
-        background-color: #f4f4f4;
-    }
-
-    .btn {
-        padding: 5px 10px;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #1E90FF;
-        color: white;
-        border: none;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .btn:hover {
-        opacity: 0.8;
-    }
-
-    .modal {
-        display: block;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-        padding-top: 60px;
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-    }
-
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .close:hover, .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .search-bar {
-        margin-top: 15px;
-        padding: 10px;
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 16px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-</style>
+<!-- Delete Confirmation Modal -->
+<div id="deleteEmployeeModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" id="closeDeleteModal">&times;</span>
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete this employee?</p>
+        <button id="confirmDelete" class="btn btn-danger">Delete</button>
+        <button id="cancelDelete" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
 
 <script>
-    // Define the base URL outside the function scope
-    const apiUrl = `${window.location.origin}/api/users`;  // Dynamic base URL
-
-    let employeesData = []; // Store fetched employees data
-
-    document.getElementById("addEmployeeBtn").addEventListener("click", () => openModal("Add Employee"));
-    document.getElementById("closeModal").addEventListener("click", closeModal);
-
-    // Fetch and display employees
-    function fetchEmployees() {
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                employeesData = data;
-                populateTable(data);
-            })
-            .catch(error => console.error("Error fetching employees:", error));
-    }
-
-    // Populate the table with employee data
-    function populateTable(employees) {
-        const tableBody = document.querySelector("#employeesTable tbody");
-        tableBody.innerHTML = "";
-        employees.forEach((employee, index) => {
-            const row = `
-            <tr>
-                <td>${index + 1}</td>
-                <td>${employee.fullName}</td>
-                <td>${employee.username}</td>
-                <td>${employee.phone}</td>
-                <td>${employee.role}</td>
-                <td>
-                    <button class="btn btn-success" onclick="editEmployee(${employee.id})">Edit</button>
-                    <button class="btn btn-danger" onclick="deleteEmployee(${employee.id})">Delete</button>
-                </td>
-            </tr>`;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    // Open modal with employee data (if editing)
-    function openModal(title, employee = null) {
-        document.getElementById("modalTitle").textContent = title;
-        document.getElementById("employeeId").value = employee ? employee.id : "";
-        document.getElementById("fullName").value = employee ? employee.fullName : "";
-        document.getElementById("username").value = employee ? employee.username : "";
-        document.getElementById("phone").value = employee ? employee.phone : "";
-        document.getElementById("password").value = ""; // Clear password field when editing
-        document.getElementById("employeeModal").style.display = "block";
-    }
-
-    // Close modal
-    function closeModal() {
-        document.getElementById("employeeModal").style.display = "none";
-    }
-
-    // Add or update employee
-    function addOrUpdateEmployee(event) {
-        event.preventDefault();
-        const id = document.getElementById("employeeId").value;
-        const method = id ? "PUT" : "POST";
-        const url = id ? `${apiUrl}/${id}` : apiUrl;
-
-        const employee = {
-            fullName: document.getElementById("fullName").value,
-            username: document.getElementById("username").value,
-            phone: document.getElementById("phone").value,
-            password: document.getElementById("password").value, // Add password to the request
-            role: "USER",
-        };
-
-        fetch(url, {
-            method: method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(employee),
-        })
-            .then(() => {
-                fetchEmployees();
-                closeModal();
-            })
-            .catch(error => console.error("Error saving employee:", error));
-    }
-
-    // Delete employee
-    function deleteEmployee(id) {
-        if (confirm("Are you sure you want to delete this employee?")) {
-            fetch(`${apiUrl}/${id}`, { method: "DELETE" })
-                .then(() => fetchEmployees())
-                .catch(error => console.error("Error deleting employee:", error));
-        }
-    }
-
-    // Edit employee details
-    function editEmployee(id) {
-        fetch(`${apiUrl}/${id}`)
-            .then(response => response.json())
-            .then(employee => openModal("Edit Employee", employee))
-            .catch(error => console.error("Error fetching employee:", error));
-    }
-
     // Filter employees based on search input
-    function filterEmployees() {
-        const searchQuery = document.getElementById("searchInput").value.toLowerCase();
-        const filteredEmployees = employeesData.filter(employee =>
-            employee.fullName.toLowerCase().includes(searchQuery) ||
-            employee.username.toLowerCase().includes(searchQuery) ||
-            employee.phone.toLowerCase().includes(searchQuery)
-        );
-        populateTable(filteredEmployees);
-    }
+    (function () {
+        const apiUrl = `${window.location.origin}/api/users`;
+        let employeesData = [];
+        let employeeToDelete = null;
 
-    // Initialize by fetching employees
-    document.getElementById("employeeForm").addEventListener("submit", addOrUpdateEmployee);
-    fetchEmployees();
+        const addEmployeeModal = document.getElementById("addEmployeeModal");
+        const editEmployeeModal = document.getElementById("editEmployeeModal");
+        const deleteEmployeeModal = document.getElementById("deleteEmployeeModal");
 
+        // Open modals
+        document.getElementById("addEmployeeBtn").addEventListener("click", () => openModal(addEmployeeModal));
+        document.getElementById("closeAddModal").addEventListener("click", () => closeModal(addEmployeeModal));
+        document.getElementById("closeEditModal").addEventListener("click", () => closeModal(editEmployeeModal));
+        document.getElementById("closeDeleteModal").addEventListener("click", () => closeModal(deleteEmployeeModal));
+
+        function closeModal(modal) {
+            modal.style.display = "none";
+        }
+
+        function openModal(modal) {
+            modal.style.display = "block";
+        }
+
+        function fetchEmployees() {
+            fetch(apiUrl)
+                .then((response) => response.json())
+                .then((data) => {
+                    employeesData = data;
+                    populateTable(data);
+                })
+                .catch((error) => console.error("Error fetching employees:", error));
+        }
+
+        function populateTable(employees) {
+            const tableBody = document.querySelector("#employeesTable tbody");
+            tableBody.innerHTML = "";
+            employees.forEach((employee, index) => {
+                const row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${employee.fullName}</td>
+                    <td>${employee.username}</td>
+                    <td>${employee.phone}</td>
+                    <td>${employee.role}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="editEmployee(${employee.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteEmployee(${employee.id})">Delete</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function addEmployee(event) {
+            event.preventDefault();
+            const newEmployee = {
+                fullName: document.getElementById("addFullName").value,
+                username: document.getElementById("addUsername").value,
+                phone: document.getElementById("addPhone").value,
+                password: document.getElementById("addPassword").value,
+                role: "USER",
+            };
+
+            fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newEmployee),
+            })
+                .then(() => {
+                    fetchEmployees();
+                    closeModal(addEmployeeModal);
+                })
+                .catch((error) => console.error("Error adding employee:", error));
+        }
+
+        function editEmployee(id) {
+            fetch(`${apiUrl}/${id}`)
+                .then((response) => response.json())
+                .then((employee) => {
+                    document.getElementById("editEmployeeId").value = employee.id;
+                    document.getElementById("editFullName").value = employee.fullName;
+                    document.getElementById("editUsername").value = employee.username;
+                    document.getElementById("editPhone").value = employee.phone;
+                    openModal(editEmployeeModal);
+                })
+                .catch((error) => console.error("Error fetching employee:", error));
+        }
+
+        function updateEmployee(event) {
+            event.preventDefault();
+            const id = document.getElementById("editEmployeeId").value;
+            const updatedEmployee = {
+                fullName: document.getElementById("editFullName").value,
+                phone: document.getElementById("editPhone").value,
+                role: "USER",
+            };
+
+            fetch(`${apiUrl}/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedEmployee),
+            })
+                .then(() => {
+                    fetchEmployees();
+                    closeModal(editEmployeeModal);
+                })
+                .catch((error) => console.error("Error updating employee:", error));
+        }
+
+        function deleteEmployee(id) {
+            employeeToDelete = id;
+            openModal(deleteEmployeeModal);
+        }
+
+        document.getElementById("confirmDelete").addEventListener("click", () => {
+            fetch(`${apiUrl}/${employeeToDelete}`, { method: "DELETE" })
+                .then(() => {
+                    fetchEmployees();
+                    closeModal(deleteEmployeeModal);
+                })
+                .catch((error) => console.error("Error deleting employee:", error));
+        });
+
+        document.getElementById("addEmployeeForm").addEventListener("submit", addEmployee);
+        document.getElementById("editEmployeeForm").addEventListener("submit", updateEmployee);
+
+        fetchEmployees();
+
+        // Expose globally for table buttons
+        window.editEmployee = editEmployee;
+        window.deleteEmployee = deleteEmployee;
+    })();
 </script>
+</body>
+</html>

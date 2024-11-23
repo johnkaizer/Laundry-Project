@@ -1,132 +1,454 @@
-<div>
-    <h3>Orders</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laundry Orders Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    <!-- Add New Order Button -->
-    <button id="addOrderBtn" class="btn btn-primary">Add New Order</button>
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    <!-- Search Input -->
-    <input type="text" id="searchInput" class="search-bar" placeholder="Search orders...">
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    <!-- Orders Table -->
+        .header h2 {
+            flex: 1;
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .search-bar {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 2;
+            max-width: 300px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-color: #4CAF50;
+        }
+
+        .btn.add i {
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn.edit {
+            background-color: #FFA500;
+        }
+
+        .btn.delete {
+            background-color: #FF0000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 500px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-body input, .modal-body select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .modal-footer .btn {
+            margin-left: 10px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table th, table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h3>Laundry Orders Management</h3>
+        <button id="addOrderBtn" class="btn btn-add">Add New Order</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search orders...">
+    </div>
+
     <table id="ordersTable" class="orders-table">
         <thead>
         <tr>
             <th>#</th>
-            <th>Customer Phone Number</th>
+            <th>Customer Phone</th>
             <th>Service Type</th>
+            <th>Description</th>
             <th>Status</th>
-            <th>Laundry Weight (kg)</th>
-            <th>Total Amount (Ksh)</th>
+            <th>Weight (kg)</th>
+            <th>Total (Ksh)</th>
             <th>Order Date</th>
             <th>Order Number</th>
-            <th>Actions</th> <!-- Column for Edit/Delete -->
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
-        <!-- Data will be dynamically filled here using JavaScript -->
+        <!-- Data will be dynamically filled here -->
         </tbody>
     </table>
 </div>
 
-<!-- Link to the external CSS file -->
-<link rel="stylesheet" href="path/to/styles.css">
+<!-- Add Order Modal -->
+<div id="addOrderModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add New Order</h2>
+        <form id="addOrderForm">
+            <label>Customer Phone Number
+                <input type="tel" name="customerPhoneNumber" required>
+            </label>
+            <label>Service Type
+                <select name="serviceType" required>
+                    <option value="Wash">Wash</option>
+                    <option value="Dry Clean">Dry Clean</option>
+                    <option value="Iron">Iron</option>
+                </select>
+            </label>
+            <label>Description
+                <textarea name="description" rows="3" placeholder="Enter order description"></textarea>
+            </label>
+            <label>Laundry Weight (kg)
+                <input type="number" name="laundryWeight" step="0.1" required>
+            </label>
+            <label>Total Amount (Ksh)
+                <input type="number" name="totalAmount" required>
+            </label>
+            <button type="submit" class="btn btn-add">Submit Order</button>
+        </form>
+    </div>
+</div>
 
-<!-- JavaScript for handling search and button actions -->
+
+<!-- Edit Order Modal -->
+<div id="editOrderModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Order</h2>
+        <form id="editOrderForm">
+            <input type="hidden" name="orderId" id="editOrderId">
+            <label>Customer Phone Number
+                <input type="tel" name="customerPhoneNumber" id="editCustomerPhone" required>
+            </label>
+            <label>Service Type
+                <select name="serviceType" id="editServiceType" required>
+                    <option value="Wash">Wash</option>
+                    <option value="Dry Clean">Dry Clean</option>
+                    <option value="Iron">Iron</option>
+                </select>
+            </label>
+            <label>Order Description
+                <input type="text" name="orderDesc" id="orderDescription">
+            </label>
+            <label>Order Status
+                <select name="status" id="editOrderStatus" required>
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </label>
+            <label>Laundry Weight (kg)
+                <input type="number" name="laundryWeight" id="editLaundryWeight" step="0.1" required>
+            </label>
+            <label>Total Amount (Ksh)
+                <input type="number" name="totalAmount" id="editTotalAmount" required>
+            </label>
+            <button type="submit" class="btn btn-edit">Update Order</button>
+        </form>
+    </div>
+</div>
 <script>
-    // Fetch orders and load them into the table
-    async function fetchOrders() {
-        const response = await fetch('/api/orders');
-        const orders = await response.json();
-        const ordersTableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
-        ordersTableBody.innerHTML = ''; // Clear current rows
+    (function () {
+        class OrderManager {
+            constructor() {
+                this.endpoints = {
+                    getAllOrders: '/api/orders',
+                    addOrder: '/api/orders',
+                    deleteOrder: '/api/orders',
+                    updateOrder: '/api/orders',
+                    markDone: '/api/orders',
+                };
+                this.tableBody = document.querySelector('#ordersTable tbody');
+                this.searchInput = document.getElementById('searchInput');
+                this.addOrderBtn = document.getElementById('addOrderBtn');
+                this.addOrderModal = document.getElementById('addOrderModal');
+                this.editOrderModal = document.getElementById('editOrderModal');
+                this.addOrderForm = document.getElementById('addOrderForm');
+                this.editOrderForm = document.getElementById('editOrderForm');
 
-        orders.forEach((order, index) => {
-            const row = ordersTableBody.insertRow();
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${order.customerPhoneNumber}</td>
-                <td>${order.serviceType}</td>
-                <td>${order.status}</td>
-                <td>${order.laundryWeight}</td>
-                <td>${order.totalAmount}</td>
-                <td>${order.orderDate}</td>
-                <td>${order.orderNumber}</td>
-                <td>
-                    <button class="btn btn-sm btn-success" onclick="editOrder(${order.id})">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteOrder(${order.id})">Delete</button>
-                    <button class="btn btn-sm btn-danger" onclick="completeOrder(${order.id})">Complete</button>
-                </td>
-            `;
-        });
-    }
-
-    // Add New Order
-    document.getElementById('addOrderBtn').addEventListener('click', () => {
-        alert('Add New Order form will go here.');
-    });
-
-    // Edit Order
-    function editOrder(orderId) {
-        alert('Edit order ' + orderId);
-    }
-
-    // Complete Order
-    async function completeOrder(orderId) {
-        const response = await fetch(`/api/orders/${orderId}/mark-done`, { method: 'PUT' });
-        if (response.ok) {
-            alert('Order marked as completed');
-            fetchOrders(); // Reload the orders after completing one
-        } else {
-            alert('Error completing order');
-        }
-    }
-
-    // Delete Order
-    async function deleteOrder(orderId) {
-        const confirmDelete = confirm('Are you sure you want to delete this order?');
-        if (confirmDelete) {
-            const response = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
-            if (response.ok) {
-                alert('Order deleted');
-                fetchOrders(); // Reload the orders after deletion
-            } else {
-                alert('Error deleting order');
+                this.initEventListeners();
             }
-        }
-    }
 
-    // Search Functionality
-    document.getElementById('searchInput').addEventListener('keyup', function () {
-        const input = document.getElementById('searchInput');
-        const filter = input.value.toLowerCase();
-        const table = document.getElementById('ordersTable');
-        const tr = table.getElementsByTagName('tr');
+            initEventListeners() {
+                document.querySelectorAll('.close').forEach((close) =>
+                    close.addEventListener('click', () => {
+                        this.addOrderModal.style.display = 'none';
+                        this.editOrderModal.style.display = 'none';
+                    })
+                );
 
-        // Loop through all table rows, and hide those that don't match the search query
-        for (let i = 1; i < tr.length; i++) {
-            const tdArray = tr[i].getElementsByTagName('td');
-            let rowContainsSearchTerm = false;
+                this.addOrderBtn.addEventListener('click', () => this.showAddOrderModal());
+                this.addOrderForm.addEventListener('submit', (e) => this.handleAddOrder(e));
+                this.editOrderForm.addEventListener('submit', (e) => this.handleEditOrder(e));
+                this.searchInput.addEventListener('keyup', () => this.searchOrders());
+            }
 
-            // Loop through all columns in the row
-            for (let j = 0; j < tdArray.length; j++) {
-                if (tdArray[j]) {
-                    const cellValue = tdArray[j].textContent || tdArray[j].innerText;
-                    if (cellValue.toLowerCase().indexOf(filter) > -1) {
-                        rowContainsSearchTerm = true;
-                        break;
+            async fetchOrders() {
+                try {
+                    const orders = await fetch(this.endpoints.getAllOrders).then((res) => res.json());
+                    this.renderOrders(orders);
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                }
+            }
+
+            renderOrders(orders) {
+                this.tableBody.innerHTML = '';
+
+                orders.forEach((order, index) => {
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${order.customerPhoneNumber}</td>
+                            <td>${order.serviceType}</td>
+                            <td>${order.description || '-'}</td>
+                            <td>${order.status}</td>
+                            <td>${order.laundryWeight}</td>
+                            <td>${order.totalAmount}</td>
+                            <td>${new Date(order.orderDate).toLocaleString()}</td>
+                            <td>${order.orderNumber}</td>
+                            <td>
+                                <button onclick='window.orderManager.showEditOrderModal(${JSON.stringify(order)})' class="btn btn-edit">Edit</button>
+                                <button onclick="window.orderManager.deleteOrder('${order.id}')" class="btn btn-delete">Delete</button>
+                                ${
+                        order.status !== 'Completed'
+                            ? `<button onclick="window.orderManager.markDone('${order.id}')" class="btn btn-done">Done</button>`
+                            : ''
+                    }
+                            </td>
+                        </tr>
+                    `;
+                    this.tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            showAddOrderModal() {
+                this.addOrderModal.style.display = 'block';
+            }
+
+            showEditOrderModal(order) {
+                document.getElementById('editOrderId').value = order.id;
+                document.getElementById('editCustomerPhone').value = order.customerPhoneNumber;
+                document.getElementById('editServiceType').value = order.serviceType;
+                document.getElementById('editOrderStatus').value = order.status;
+                document.getElementById('editLaundryWeight').value = order.laundryWeight;
+                document.getElementById('editTotalAmount').value = order.totalAmount;
+
+                this.editOrderModal.style.display = 'block';
+            }
+
+            async markDone(orderId) {
+                try {
+                    const response = await fetch(`${this.endpoints.markDone}/${orderId}/mark-done`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+
+                    if (response.ok) {
+                        await this.fetchOrders();
+                    } else {
+                        console.error('Error marking order as done');
+                    }
+                } catch (error) {
+                    console.error('Error marking order as done:', error);
+                }
+            }
+
+            async handleAddOrder(event) {
+                event.preventDefault();
+                const formData = new FormData(this.addOrderForm);
+                const orderData = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch(this.endpoints.addOrder, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ...orderData,
+                            orderDate: new Date(),
+                            status: 'Pending',
+                            orderNumber: this.generateOrderNumber(),
+                        }),
+                    });
+
+                    if (response.ok) {
+                        this.addOrderModal.style.display = 'none';
+                        this.addOrderForm.reset();
+                        this.fetchOrders();
+                    }
+                } catch (error) {
+                    console.error('Error adding order:', error);
+                }
+            }
+
+            async handleEditOrder(event) {
+                event.preventDefault();
+                const formData = new FormData(this.editOrderForm);
+                const orderData = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch(`${this.endpoints.updateOrder}/${orderData.orderId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData),
+                    });
+
+                    if (response.ok) {
+                        this.editOrderModal.style.display = 'none';
+                        this.editOrderForm.reset();
+                        this.fetchOrders();
+                    }
+                } catch (error) {
+                    console.error('Error updating order:', error);
+                }
+            }
+
+            async deleteOrder(orderId) {
+                if (confirm('Are you sure you want to delete this order?')) {
+                    try {
+                        await fetch(`${this.endpoints.deleteOrder}/${orderId}`, {
+                            method: 'DELETE',
+                        });
+                        this.fetchOrders();
+                    } catch (error) {
+                        console.error('Error deleting order:', error);
                     }
                 }
             }
 
-            // Show or hide the row based on the search query
-            if (rowContainsSearchTerm) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
+            generateOrderNumber() {
+                return 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            }
+
+            searchOrders() {
+                const filter = this.searchInput.value.toLowerCase();
+                const rows = this.tableBody.getElementsByTagName('tr');
+
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName('td');
+                    const rowContainsSearchTerm = Array.from(cells).some((cell) =>
+                        cell.textContent.toLowerCase().includes(filter)
+                    );
+
+                    rows[i].style.display = rowContainsSearchTerm ? '' : 'none';
+                }
             }
         }
-    });
 
-    // Load orders initially
-    fetchOrders();
+        window.orderManager = new OrderManager(); // Expose globally
+        window.orderManager.fetchOrders();
+    })();
 </script>
+
+</body>
+</html>
